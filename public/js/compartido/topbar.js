@@ -1,5 +1,3 @@
-/* public/js/compartido/topbar.js */
-
 function toggleUserMenu() {
     const wrapper = document.getElementById('userDropdownWrapper');
     wrapper.classList.toggle('open');

@@ -9,8 +9,9 @@
         <span class="card-title">Lista de usuarios</span>
         <button class="btn-primary" onclick="abrirModal()">+ Agregar usuario</button>
     </div>
-    <table>
-        <thead><tr><th>#</th><th>Nombre</th><th>Correo</th><th>Usuario</th><th>Rol</th><th>Acciones</th></tr></thead>
+<div class="w-full overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+<table class="min-w-[600px] w-full text-sm text-left">
+        <thead><tr><th>#</th><th>Nombre</th><th>Correo</th><th>Usuario</th><th>Rol</th><th>Descripción</th><th>Acciones</th></tr></thead>
         <tbody>
         @forelse($usuarios as $u)
         @php
@@ -27,6 +28,7 @@
             <td>{{ $u->correo }}</td>
             <td>{{ $u->usuario }}</td>
             <td><span class="badge {{ $rolClass }}">{{ ucfirst($u->rol) }}</span></td>
+            <td>{{ $u->descripcion }}</td>
             <td>
                 <div class="action-btns">
                     <button
@@ -38,6 +40,7 @@
     data-correo="{{ $u->correo }}"
     data-usuario="{{ $u->usuario }}"
     data-rol="{{ $u->rol }}"
+    data-descripcion="{{ $u->descripcion }}"
 >
     Editar
 </button>
@@ -62,14 +65,16 @@
             </td>
         </tr>
         @empty
-        <tr><td colspan="6" style="text-align:center;color:#6c757d;padding:20px">No hay usuarios.</td></tr>
+        <tr><td colspan="7" style="text-align:center;color:#6c757d;padding:20px">No hay usuarios.</td></tr>
         @endforelse
         </tbody>
     </table>
 </div>
 
+</div>
+
 <div class="modal-overlay" id="modalOverlay">
-<div class="modal">
+<div class="modal w-[95%] max-w-lg mx-auto sm:w-full">
     <h2 id="modalTitulo">Agregar usuario</h2>
     <form id="formUsuario" method="POST" action="{{ route('admin.usuarios.store') }}">
         @csrf <span id="methodField"></span>
@@ -85,6 +90,9 @@
                     <option value="asistente">Asistente</option>
                     <option value="cliente">Cliente</option>
                 </select>
+            </div>
+            <div class="form-group full" id="descripcionGroup" style="display:none"><label>Descripción</label>
+                <textarea name="descripcion" id="userDescripcion" rows="3"></textarea>
             </div>
         </div>
         <div class="form-actions">
@@ -106,6 +114,8 @@ function abrirModal(){
     document.getElementById('modalTitulo').textContent='Agregar usuario';
     document.getElementById('btnSubmit').textContent='Agregar';
     document.getElementById('passNote').textContent='(requerida)';
+    document.getElementById('userDescripcion').value='';
+    document.getElementById('descripcionGroup').style.display = document.getElementById('userRol').value === 'cliente' ? 'block' : 'none';
     overlay.classList.add('open');
 }
 function cerrarModal(){ overlay.classList.remove('open'); }
@@ -119,9 +129,14 @@ function editarUsuario(id,nombre,correo,usuario,rol){
     document.getElementById('userRol').value=rol;
     document.getElementById('userPass').value='';
     document.getElementById('passNote').textContent='(dejar vacío para no cambiar)';
+    document.getElementById('userDescripcion').value = document.querySelector(`[data-id="${id}"]`)?.dataset?.descripcion ?? '';
+    document.getElementById('descripcionGroup').style.display = rol === 'cliente' ? 'block' : 'none';
     document.getElementById('modalTitulo').textContent='Editar usuario';
     document.getElementById('btnSubmit').textContent='Guardar cambios';
     overlay.classList.add('open');
 }
+document.getElementById('userRol').addEventListener('change', function(){
+    document.getElementById('descripcionGroup').style.display = this.value === 'cliente' ? 'block' : 'none';
+});
 </script>
 @endpush

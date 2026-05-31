@@ -17,14 +17,18 @@
 .form-group input,.form-group textarea{padding:9px 12px;border:1px solid #dee2e6;border-radius:6px;font-size:13px;font-family:inherit;outline:none;background:#f8f9fa}
 .form-group input:focus,.form-group textarea:focus{border-color:#64b5f6;background:#fff}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 @endpush
 
 @section('contenido')
-<div style="display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start">
-
-    <div class="card">
-        <div class="detalle-hero hero-{{ strtolower($propiedad->tipo) }}">
-            <span style="color:rgba(255,255,255,0.3);font-size:14px">Sin foto disponible</span>
+<div style="width:100%; padding:15px; display:flex; flex-direction:row; gap:20px; align-items:flex-start;">
+    <div class="card" style="flex:0 0 360px; max-width:360px;">
+        <div class="w-full relative overflow-hidden bg-slate-100 mb-5 rounded-lg" style="height:220px;">
+            @if($propiedad->imagen)
+                <img src="{{ asset('storage/' . $propiedad->imagen) }}" alt="{{ $propiedad->titulo }}" style="width:100%;height:100%;object-fit:cover;">
+            @else
+                <span style="color:#aaa;font-size:14px">Sin foto disponible</span>
+            @endif
             <span class="hero-tag tag-{{ strtolower($propiedad->tipo) }}">{{ $propiedad->tipo }}</span>
         </div>
         <h2 style="font-size:20px;font-weight:600;color:#0f4c75;margin-bottom:6px">{{ $propiedad->titulo }}</h2>
@@ -38,13 +42,20 @@
         <hr style="border:none;border-top:1px solid #e2e6ea;margin:20px 0">
         <p style="font-size:13px;font-weight:500;color:#0f4c75;margin-bottom:8px">Descripción</p>
         <p style="font-size:13px;color:#444;line-height:1.7">{{ $propiedad->descripcion ?? 'Sin descripción.' }}</p>
+
+        @if($propiedad->latitud && $propiedad->longitud)
+        <hr style="border:none;border-top:1px solid #e2e6ea;margin:20px 0">
+        <p style="font-size:13px;font-weight:500;color:#0f4c75;margin-bottom:8px;">📍 Ubicación</p>
+        <div id="mapaDetalle" style="height:220px;border-radius:8px;border:1px solid #dee2e6;"></div>
+        @endif
+
         <div style="margin-top:20px">
             <a href="{{ route('cliente.propiedades') }}" class="btn-detalle">← Volver</a>
         </div>
     </div>
 
     @if(auth()->user()->rol === 'cliente')
-    <div class="card">
+    <div class="card" style="flex:1; min-width:0;">
         <p style="font-size:15px;font-weight:600;color:#0f4c75;margin-bottom:16px">Solicitar visita</p>
         <form method="POST" action="{{ route('cliente.solicitudes.store') }}">
             @csrf
@@ -61,10 +72,30 @@
         </form>
     </div>
     @else
-    <div class="card" style="text-align:center;color:#6c757d;padding:30px">
+    <div class="card" style="flex:1; min-width:0; text-align:center;color:#6c757d;padding:30px">
         <p style="font-size:13px">Solo los clientes pueden solicitar visitas.</p>
     </div>
     @endif
 
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+@if($propiedad->latitud && $propiedad->longitud)
+var propLat    = {{ $propiedad->latitud }};
+var propLng    = {{ $propiedad->longitud }};
+var propTitulo = "{{ $propiedad->titulo }}";
+var propZona   = "{{ $propiedad->zona }}";
+
+const mapaDet = L.map('mapaDetalle').setView([propLat, propLng], 16);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    { attribution: '© OpenStreetMap' }).addTo(mapaDet);
+L.marker([propLat, propLng])
+    .addTo(mapaDet)
+    .bindPopup('<b>' + propTitulo + '</b><br>' + propZona)
+    .openPopup();
+@endif
+</script>
+@endpush

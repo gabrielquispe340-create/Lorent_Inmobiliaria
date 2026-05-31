@@ -21,7 +21,7 @@
 {{-- ═══════════════════════════════════════
      TARJETAS DE ESTADÍSTICAS
 ════════════════════════════════════════ --}}
-<div class="stats">
+<div class="stats grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
     <div class="stat-card">
         <p class="stat-label">Clientes registrados</p>
@@ -58,7 +58,8 @@
         <a href="{{ route('asistente.visitas') }}" class="btn-primary">Ver agenda completa</a>
     </div>
     <div class="table-responsive">
-        <table>
+<div class="w-full overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+<table class="min-w-[600px] w-full text-sm text-left">
             <thead>
                 <tr>
                     <th>Cliente</th>
@@ -97,7 +98,8 @@
             @endforelse
             </tbody>
         </table>
-    </div>
+</div>
+ </div>
 </div>
 
 {{-- ═══════════════════════════════════════
@@ -108,7 +110,8 @@
         <span class="card-title">Últimos clientes registrados</span>
     </div>
     <div class="table-responsive">
-        <table>
+<div class="w-full overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+<table class="min-w-[600px] w-full text-sm text-left">
             <thead>
                 <tr>
                     <th>#</th>
@@ -141,7 +144,8 @@
             @endforelse
             </tbody>
         </table>
-    </div>
+</div>
+ </div>
 </div>
 
 @endsection

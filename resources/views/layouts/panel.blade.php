@@ -11,22 +11,20 @@
         <link rel="stylesheet" href="{{ asset('css/dashboard_usuario.css') }}">
     @endif
     <link rel="stylesheet" href="{{ asset('css/compartido/topbar.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
     @stack('styles')
+    <style> #sidebar-mobile { position: fixed !important; top: 0; left: 0; bottom: 0; width: 260px; background: #0f172a; z-index: 9999; transform: translateX(-100%); transition: transform 0.3s ease; } #sidebar-mobile.active { transform: translateX(0); } @media (min-width: 768px) { #sidebar-mobile { position: static !important; transform: none !important; } } </style>
 </head>
 <body>
 
-{{-- Overlay oscuro al abrir sidebar en móvil --}}
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="cerrarSidebar()"></div>
 
 <div class="layout">
     @include('compartido.sidebar')
 
-    <div class="main">
-        <div class="topbar">
+    <div class="main" style="margin-left: 0 !important;">
+        <div class="topbar z-40 relative">
             {{-- Botón hamburguesa visible solo en móvil --}}
-            <button class="btn-hamburger" id="btnHamburger" onclick="abrirSidebar()" aria-label="Abrir menú">
-                ☰
-            </button>
+            <button type="button" id="btn-menu-trigger" style="cursor: pointer; padding: 10px; z-index: 10000;" class="md:hidden">☰</button>
             <span class="topbar-title">@yield('titulo_pagina', 'Panel')</span>
             <div class="user-info" id="userDropdownWrapper">
                 <div class="user-avatar" id="userAvatarBtn" onclick="toggleUserMenu()" title="Opciones de cuenta">
@@ -82,36 +80,15 @@
     </div>
 </div>
 
-<script>
-function abrirSidebar() {
-    document.querySelector('.sidebar').classList.add('open');
-    document.getElementById('sidebarOverlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-function cerrarSidebar() {
-    document.querySelector('.sidebar').classList.remove('open');
-    document.getElementById('sidebarOverlay').classList.remove('open');
-    document.body.style.overflow = '';
-}
-// Cerrar sidebar al hacer clic en un link del menú (móvil)
-document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-        if (window.innerWidth <= 768) cerrarSidebar();
-    });
-});
-// Cerrar con tecla Escape
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') cerrarSidebar();
-});
-</script>
+
 
 <script src="{{ asset('js/compartido/topbar.js') }}"></script>
 @stack('scripts')
 
 {{-- MODAL ELIMINAR GLOBAL --}}
-<div class="delete-modal-overlay" id="deleteModal">
+<div class="delete-modal-overlay fixed hidden inset-0 z-[60]" id="deleteModal" style="background: rgba(15,23,42,0.4); backdrop-filter: blur(4px);">
 
-    <div class="delete-modal">
+    <div class="delete-modal w-[95%] max-w-md mx-auto">
 
         <button class="delete-close" id="closeDeleteModal">
             ×
@@ -122,14 +99,14 @@ document.addEventListener('keydown', e => {
         </div>
 
         <h2 class="delete-title">
-            Eliminar 
+            Eliminar registro
         </h2>
 
         <p class="delete-text" id="deleteText">
             ¿Seguro que deseas eliminar este elemento?
         </p>
 
-        <div class="delete-actions">
+        <div class="delete-actions flex flex-col sm:flex-row gap-2">
 
             <button type="button"
                     class="btn-cancel-delete"
@@ -167,36 +144,15 @@ document.querySelectorAll('.open-delete-modal').forEach(button => {
 
     button.addEventListener('click', () => {
 
-        currentDeleteForm = button.closest('.delete-form');
+        currentDeleteForm = button.closest('.delete-form, .form-eliminar');
 
-        const name = button.dataset.name || 'este registro';
+        const name = button.dataset.name || button.closest('form')?.dataset?.title || 'este registro';
 
         deleteText.textContent =
             `¿Seguro que deseas eliminar "${name}"? Esta acción no se puede deshacer.`;
 
-        deleteModal.classList.add('open');
-
-    });
-
-});
-
-
-// BOTONES ELIMINAR
-document.querySelectorAll('.btn-delete')
-.forEach(button => {
-
-    button.addEventListener('click', () => {
-
-        deleteForm =
-            button.closest('.form-eliminar');
-
-        const title =
-            deleteForm.dataset.title || 'este registro';
-
-        deleteMessage.innerHTML =
-            `¿Seguro que deseas eliminar <b>${title}</b>?<br>
-            Esta acción no se puede deshacer.`;
-
+        deleteModal.classList.remove('hidden');
+        deleteModal.classList.add('flex');
         deleteModal.classList.add('open');
 
     });
@@ -207,6 +163,8 @@ document.querySelectorAll('.btn-delete')
 function cerrarModalEliminar() {
 
     deleteModal.classList.remove('open');
+    deleteModal.classList.remove('flex');
+    deleteModal.classList.add('hidden');
 
 }
 
@@ -224,9 +182,9 @@ deleteModal.addEventListener('click', e => {
 // CLICK CONFIRMAR
 confirmDeleteBtn.addEventListener('click', () => {
 
-    if(deleteForm) {
+    if(currentDeleteForm) {
 
-        deleteForm.submit();
+        currentDeleteForm.submit();
 
     }
 
@@ -234,76 +192,46 @@ confirmDeleteBtn.addEventListener('click', () => {
 
 // BOTÓN X
 document.querySelector('.delete-close')
-.addEventListener('click', () => {
+?.addEventListener('click', () => {
 
-    deleteModal.classList.remove('open');
+    cerrarModalEliminar();
 
 });
 
 
 // BOTÓN CANCELAR
 document.querySelector('.btn-cancel-delete')
-.addEventListener('click', () => {
+?.addEventListener('click', () => {
 
-    deleteModal.classList.remove('open');
+    cerrarModalEliminar();
 
 });
 </script>
 
-<!-- MODAL ELIMINAR -->
-<div class="delete-modal-overlay" id="deleteModal">
-
-    <div class="delete-modal">
-
-        <button class="delete-close" onclick="cerrarModalEliminar()">
-            ✕
-        </button>
-
-        <div class="delete-icon">
-            ⚠
-        </div>
-
-        <h2>Eliminar registro</h2>
-
-        <p id="deleteMessage">
-            ¿Seguro que deseas eliminar este registro?
-        </p>
-
-        <div class="delete-actions">
-            <button class="btn-cancel-delete"
-                    onclick="cerrarModalEliminar()">
-                Cancelar
-            </button>
-
-            <button class="btn-confirm-delete"
-                    id="confirmDeleteBtn">
-                Eliminar
-            </button>
-        </div>
-
-    </div>
-
-</div>
 <script>
-function cerrarModalEliminar() {
-    deleteModal.classList.remove('open');
-}
+window.onload = function() {
+    var btn  = document.getElementById('btn-menu-trigger');
+    var menu = document.getElementById('sidebar-mobile');
+    if (btn && menu) {
+        btn.onclick = function() {
+            if (menu.style.transform === 'translateX(0%)') {
+                menu.style.transform = 'translateX(-100%)';
+            } else {
+                menu.style.transform = 'translateX(0%)';
+            }
+        };
 
-confirmDeleteBtn.addEventListener('click', () => {
-
-    if(deleteForm) {
-        deleteForm.submit();
+        // ← AGREGA ESTO: cerrar al tocar fuera del sidebar
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth < 768 &&
+                menu.style.transform === 'translateX(0%)' &&
+                !menu.contains(e.target) &&
+                e.target !== btn) {
+                menu.style.transform = 'translateX(-100%)';
+            }
+        });
     }
-
-});
-
-deleteModal.addEventListener('click', e => {
-
-    if(e.target === deleteModal) {
-        cerrarModalEliminar();
-    }
-
-});
+};
 </script>
 </body>
 </html>

@@ -8,7 +8,8 @@
         <span class="card-title">Lista de usuarios</span>
         <button class="btn-primary" onclick="abrirModal()">+ Agregar usuario</button>
     </div>
-    <table>
+<div class="w-full overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+<table class="min-w-[600px] w-full text-sm text-left">
         <thead><tr><th>#</th><th>Nombre</th><th>Correo</th><th>Usuario</th><th>Rol</th><th>Acciones</th></tr></thead>
         <tbody>
         @forelse($usuarios as $u)
@@ -27,7 +28,7 @@
             <td>{{ $u->usuario }}</td>
             <td><span class="badge {{ $rolClass }}">{{ ucfirst($u->rol) }}</span></td>
             <td>
-                <div class="action-btns">
+                <div class="action-btns flex flex-col sm:flex-row gap-2">
                     <button
                         type="button"
                         class="btn-edit btn-editar-usuario"
@@ -49,7 +50,7 @@
                         @csrf
                         @method('DELETE')
 
-                        <button type="button" class="btn-delete">
+                        <button type="button" class="btn-delete open-delete-modal-user">
                             Eliminar
                         </button>
 
@@ -65,9 +66,11 @@
     </table>
 </div>
 
+</div>
+
 {{-- MODAL AGREGAR --}}
 <div class="modal-overlay" id="modalOverlay">
-<div class="modal">
+<div class="modal w-[95%] max-w-lg mx-auto sm:w-full">
     <h2 id="modalTitulo">Agregar usuario</h2>
 
     {{-- Formulario AGREGAR --}}
@@ -107,7 +110,7 @@
                 </select>
             </div>
         </div>
-        <div class="form-actions">
+        <div class="form-actions flex flex-col sm:flex-row gap-2 mt-4">
             <button type="button" class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
             <button type="submit" class="btn-primary">Agregar</button>
         </div>
@@ -150,13 +153,28 @@
                 </select>
             </div>
         </div>
-        <div class="form-actions">
+        <div class="form-actions flex flex-col sm:flex-row gap-2 mt-4">
             <button type="button" class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
             <button type="submit" class="btn-primary">Guardar cambios</button>
         </div>
     </form>
 
 </div>
+</div>
+
+{{-- MODAL CONFIRMAR ELIMINACIÓN USUARIO --}}
+<div id="deleteUserOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+        <div style="width:72px;height:72px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+            <span style="font-size:36px;">👤</span>
+        </div>
+        <h2 style="font-size:18px;font-weight:700;color:#0f172a;margin-bottom:10px;">Eliminar usuario</h2>
+        <p id="deleteUserMsg" style="font-size:14px;color:#64748b;margin-bottom:28px;line-height:1.6;"></p>
+        <div style="display:flex;gap:12px;justify-content:center;">
+            <button onclick="cerrarDeleteUserModal()" style="padding:10px 24px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:14px;font-weight:500;cursor:pointer;">Cancelar</button>
+            <button id="btnConfirmarEliminarUser" style="padding:10px 24px;border:none;border-radius:8px;background:#dc2626;color:#fff;font-size:14px;font-weight:600;cursor:pointer;">Sí, eliminar</button>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -238,6 +256,33 @@ document.querySelectorAll('.btn-editar-usuario')
 
     });
 
+});
+
+// ── ELIMINAR USUARIO ──────────────────────────────────
+let pendingUserForm = null;
+
+document.querySelectorAll('.open-delete-modal-user').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const form  = this.closest('.form-eliminar');
+        const title = form.dataset.title || 'este usuario';
+        pendingUserForm = form;
+        document.getElementById('deleteUserMsg').textContent =
+            `¿Seguro que deseas eliminar al usuario "${title}"? Esta acción no se puede deshacer.`;
+        document.getElementById('deleteUserOverlay').style.display = 'flex';
+    });
+});
+
+function cerrarDeleteUserModal() {
+    document.getElementById('deleteUserOverlay').style.display = 'none';
+    pendingUserForm = null;
+}
+
+document.getElementById('btnConfirmarEliminarUser').addEventListener('click', function() {
+    if (pendingUserForm) pendingUserForm.submit();
+});
+
+document.getElementById('deleteUserOverlay').addEventListener('click', function(e) {
+    if (e.target === this) cerrarDeleteUserModal();
 });
 
 </script>

@@ -61,7 +61,7 @@
                 <i class="ti ti-search" style="font-size:15px"></i>
                 Buscar
             </button>
-            {{-- Botón nueva propiedad --}}
+            {{-- Botón nueva propiedad (comentado) --}}
             <button type="button" onclick="abrirModal()" style="
                 padding:12px 18px;
                 background:rgba(255,255,255,0.12); color:#fff;
@@ -236,15 +236,14 @@
         <div class="card" style="margin-bottom:12px;transition:box-shadow .2s"
              onmouseover="this.style.boxShadow='0 4px 20px rgba(26,158,92,0.12)'"
              onmouseout="this.style.boxShadow=''">
-            <div style="display:flex;gap:0;overflow:hidden;border-radius:12px">
+            <div class="flex flex-col sm:flex-row gap-0 overflow-hidden rounded-xl">
 
-                <div style="
-                    width:130px; flex-shrink:0;
-                    background:{{ $p->tipo==='Venta' ? '#1e3a5f' : ($p->tipo==='Alquiler' ? '#0f4c35' : '#2e1a5f') }};
-                    display:flex; align-items:center; justify-content:center;
-                    position:relative;
-                ">
-                    <i class="ti ti-building-estate" style="font-size:32px;color:rgba(255,255,255,0.2)"></i>
+                <div class="w-full sm:w-48 flex-shrink-0 relative" style="background:{{ $p->tipo==='Venta' ? '#1e3a5f' : ($p->tipo==='Alquiler' ? '#0f4c35' : '#2e1a5f') }};">
+                    @if($p->imagen)
+                        <img src="{{ asset('storage/' . $p->imagen) }}" alt="{{ $p->titulo }}" class="w-full h-48 object-cover rounded-t-lg sm:h-full sm:rounded-l-lg sm:rounded-tr-none">
+                    @else
+                        <i class="ti ti-building-estate" style="font-size:32px;color:rgba(255,255,255,0.2)"></i>
+                    @endif
                     <span style="
                         position:absolute; bottom:8px; left:8px;
                         font-size:10px; font-weight:600; padding:3px 8px; border-radius:20px;
@@ -252,7 +251,7 @@
                     ">{{ $p->tipo }}</span>
                 </div>
 
-                <div style="flex:1;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <div class="flex-1 p-4 flex flex-col justify-between gap-3 sm:gap-4">
                     <div style="flex:1;min-width:150px">
                         <p style="font-size:14px;font-weight:600;color:#0f172a;margin-bottom:3px">
                             {{ $p->titulo }}
@@ -280,7 +279,7 @@
                             ${{ number_format($p->precio,0,',','.') }}
                         </p>
                         {{-- Agente: puede editar y eliminar sus propias propiedades --}}
-                        <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+                        <div class="flex flex-col sm:flex-row gap-2 justify-end w-full sm:w-auto mt-2">
                             <button
                                 type="button"
                                 onclick="editarPropiedad(
@@ -292,7 +291,8 @@
                                     '{{ $p->area }}',
                                     '{{ addslashes($p->descripcion) }}',
                                     '{{ $p->estado }}',
-                                    '{{ $p->agente_id }}'
+                                    '{{ $p->agente_id }}',
+                                    '{{ $p->imagen }}'
                                     )"
                                 style="
                                     padding:7px 14px;
@@ -311,13 +311,7 @@
                                   style="display:inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" class="btn-delete open-delete-modal" style="
-                                    padding:7px 14px;
-                                    background:#fee2e2; color:#991b1b;
-                                    border:1px solid #fecaca; border-radius:8px;
-                                    font-size:12px; font-weight:600; font-family:inherit;
-                                    cursor:pointer;
-                                ">
+                                <button type="button" class="btn-delete open-delete-modal w-full sm:w-auto px-4 py-2 bg-red-100 text-red-800 border border-red-200 rounded-lg text-xs font-semibold cursor-pointer">
                                     <i class="ti ti-trash" style="font-size:13px"></i>
                                     Eliminar
                                 </button>
@@ -354,9 +348,9 @@
 
 {{-- MODAL EDITAR --}}
 <div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
+    <div class="modal w-[95%] max-w-lg mx-auto sm:w-full">
         <h2 id="modalTitulo">Editar propiedad</h2>
-        <form id="formEditar" method="POST" action="#">
+        <form id="formEditar" method="POST" action="#" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="form-grid">
@@ -379,6 +373,12 @@
                     </select>
                 </div>
                 <div class="form-group full"><label>Descripción</label><textarea name="descripcion" id="eDescripcion" rows="3" required></textarea></div>
+                <div class="form-group full">
+                    <label>Imagen <small style="color:#6c757d;font-weight:400">(dejar vacío para mantener la actual)</small></label>
+                    <img id="cImgActual" src="" alt="Foto actual" style="display:none;max-height:80px;border-radius:6px;object-fit:cover;margin-bottom:6px">
+                    <input type="file" name="imagen" id="cImagen" accept="image/jpeg,image/png,image/jpg,image/webp">
+                    <img id="cPreview" src="" alt="Vista previa" style="display:none;margin-top:6px;max-height:80px;border-radius:6px;object-fit:cover">
+                </div>
             </div>
             <div class="form-actions">
                 <button type="button" class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
@@ -408,7 +408,7 @@ function cerrarModal() { overlay.classList.remove('open'); }
 
 overlay.addEventListener('click', e => { if (e.target === overlay) cerrarModal(); });
 
-function editarPropiedad(id, titulo, tipo, zona, precio, area, descripcion, estado) {
+function editarPropiedad(id, titulo, tipo, zona, precio, area, descripcion, estado, imagen) {
     document.getElementById('formEditar').action = `/agente/propiedades/${id}`;
     document.getElementById('eTitulo').value      = titulo;
     document.getElementById('eTipo').value        = tipo;
@@ -417,6 +417,11 @@ function editarPropiedad(id, titulo, tipo, zona, precio, area, descripcion, esta
     document.getElementById('eArea').value        = area;
     document.getElementById('eDescripcion').value = descripcion;
     document.getElementById('eEstado').value      = estado;
+    const imgActual = document.getElementById('cImgActual');
+    if (imagen) { imgActual.src = '/storage/' + imagen; imgActual.style.display = 'block'; }
+    else { imgActual.src = ''; imgActual.style.display = 'none'; }
+    document.getElementById('cPreview').style.display = 'none';
+    document.getElementById('cImagen').value = '';
     overlay.classList.add('open');
 }
 
@@ -426,5 +431,10 @@ function guardarEdicion() {
         form.submit();
     }
 }
+
+document.getElementById('cImagen').addEventListener('change', function(){
+    const prev = document.getElementById('cPreview');
+    if (this.files && this.files[0]) { prev.src = URL.createObjectURL(this.files[0]); prev.style.display = 'block'; }
+});
 </script>
 @endpush

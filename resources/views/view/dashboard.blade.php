@@ -5,7 +5,7 @@
 
 @section('contenido')
 
-<div class="stats">
+<div class="stats grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     <div class="stat-card">
         <p class="stat-label">Total propiedades</p>
         <p class="stat-value">{{ $totalProps }}</p>
@@ -26,7 +26,8 @@
         <span class="card-title">Últimas propiedades</span>
         <a href="{{ route('admin.propiedades') }}" class="btn-primary">Ver todas</a>
     </div>
-    <table>
+<div class="w-full overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+<table class="min-w-[600px] w-full text-sm text-left">
         <thead>
             <tr><th>Título</th><th>Zona</th><th>Tipo</th><th>Precio</th><th>Estado</th><th>Agente</th></tr>
         </thead>
@@ -45,6 +46,8 @@
         @endforelse
         </tbody>
     </table>
+</div>
+
 </div>
 
 @endsection

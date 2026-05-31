@@ -1,7 +1,16 @@
-@php $rol = auth()->user()->rol; $ruta = Route::currentRouteName(); @endphp
+@php 
+$rol = auth()->user()->rol; 
+$ruta = Route::currentRouteName(); 
+$pendientes = 0;
+if ($rol === 'agente') {
+    $pendientes = \App\Models\SolicitudVisita::where('estado', 'Pendiente')->whereHas('propiedad', function($q) { $q->where('agente_id', auth()->id()); })->count();
+} elseif ($rol === 'asistente') {
+    $pendientes = \App\Models\SolicitudVisita::where('estado', 'Pendiente')->count();
+}
+@endphp
 
 @if(in_array($rol, ['administrador','agente','asistente']))
-<aside class="sidebar">
+<aside id="sidebar-mobile" class="md:translate-x-0 md:static md:inset-0" style="transition: transform 0.3s ease-in-out; position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #1e293b; z-index: 9999; transform: translateX(-100%);">
     <div class="logo modern-logo">
     <div class="logo-icon">
         🏠
@@ -46,11 +55,18 @@
         <a href="{{ route('agente.buscar') }}" class="nav-item {{ str_starts_with($ruta,'agente.buscar') ? 'active':'' }}">
             <span class="nav-dot" style="background:#F4C0D1"></span>Buscar propiedades
         </a>
-        <a href="{{ route('agente.visitas') }}" class="nav-item {{ str_starts_with($ruta,'agente.visitas') ? 'active':'' }}">
+        <a href="{{ route('agente.visitas') }}" class="nav-item {{ str_starts_with($ruta,'agente.visitas') ? 'active':'' }}" style="display:flex;align-items:center;">
             <span class="nav-dot" style="background:#FAC775"></span>Visitas
+            @if($pendientes > 0)<span class="relative flex h-3 w-3 ml-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span></span>@endif
         </a>
         <a href="{{ route('agente.clientes') }}" class="nav-item {{ str_starts_with($ruta,'agente.clientes') ? 'active':'' }}">
             <span class="nav-dot" style="background:#F4C0D1"></span>Clientes
+        </a>
+        <a href="{{ route('agente.prospectos.index') }}" class="nav-item {{ str_starts_with($ruta,'agente.prospectos') ? 'active':'' }}">
+            <span class="nav-dot" style="background:#AFA9EC"></span>Prospectos CRM
+        </a>
+        <a href="{{ route('agente.calendario') }}" class="nav-item {{ str_starts_with($ruta,'agente.calendario') ? 'active':'' }}">
+            <span class="nav-dot" style="background:#818cf8"></span>Calendario
         </a>
 
     @elseif($rol === 'asistente')
@@ -62,8 +78,12 @@
         <a href="{{ route('asistente.buscar') }}" class="nav-item {{ str_starts_with($ruta,'asistente.buscar') ? 'active':'' }}">
             <span class="nav-dot" style="background:#F4C0D1"></span>Buscar propiedades
         </a>
-        <a href="{{ route('asistente.visitas') }}" class="nav-item {{ str_starts_with($ruta,'asistente.visitas') ? 'active':'' }}">
+        <a href="{{ route('asistente.visitas') }}" class="nav-item {{ str_starts_with($ruta,'asistente.visitas') ? 'active':'' }}" style="display:flex;align-items:center;">
             <span class="nav-dot" style="background:#FAC775"></span>Agenda / Visitas
+            @if($pendientes > 0)<span class="relative flex h-3 w-3 ml-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span></span>@endif
+        </a>
+        <a href="{{ route('asistente.calendario') }}" class="nav-item {{ str_starts_with($ruta,'asistente.calendario') ? 'active':'' }}">
+            <span class="nav-dot" style="background:#818cf8"></span>Calendario
         </a>
         <a href="{{ route('asistente.reportes') }}" class="nav-item {{ str_starts_with($ruta,'asistente.reportes') ? 'active':'' }}">
             <span class="nav-dot" style="background:#AFA9EC"></span>Reportes
@@ -75,17 +95,12 @@
             <span class="nav-dot" style="background:#AFA9EC"></span>Mi perfil
         </a>
     </nav>
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit" class="nav-logout" style="width:100%;background:none;border:none;cursor:pointer;text-align:left">
-            ↩ Cerrar sesión
-        </button>
-    </form>
+    
 </aside>
 
 @else
 {{-- SIDEBAR CLIENTE --}}
-<aside class="sidebar">
+<aside id="sidebar-mobile" class="md:translate-x-0 md:static md:inset-0" style="transition: transform 0.3s ease-in-out; position: fixed; top: 0; left: 0; bottom: 0; width: 260px; background: #1e293b; z-index: 9999; transform: translateX(-100%);">
     <div class="logo">
         <span class="logo-title">Lorent</span>
         <span class="logo-sub">Inmobiliaria</span>
@@ -104,16 +119,14 @@
         <a href="{{ route('cliente.solicitudes') }}" class="nav-item {{ str_starts_with($ruta,'cliente.solicitudes') ? 'active':'' }}">
             <span class="nav-dot" style="background:#FAC775"></span>Mis solicitudes
         </a>
+        <a href="{{ route('cliente.calendario') }}" class="nav-item {{ str_starts_with($ruta,'cliente.calendario') ? 'active':'' }}">
+            <span class="nav-dot" style="background:#818cf8"></span>Calendario
+        </a>
         <p class="nav-section">Cuenta</p>
         <a href="{{ route('perfil') }}" class="nav-item {{ $ruta === 'perfil' ? 'active':'' }}">
             <span class="nav-dot" style="background:#AFA9EC"></span>Mi perfil
         </a>
     </nav>
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit" class="nav-logout" style="width:100%;background:none;border:none;cursor:pointer;text-align:left">
-            ↩ Cerrar sesión
-        </button>
-    </form>
+    
 </aside>
 @endif

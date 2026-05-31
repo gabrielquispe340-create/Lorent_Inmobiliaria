@@ -92,7 +92,7 @@
 {{-- ═══════════════════════════════════════
      TARJETAS DE RESUMEN
 ════════════════════════════════════════ --}}
-<div class="stats" style="margin-bottom:20px">
+<div class="stats grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" style="margin-bottom:20px">
 
     <div class="stat-card">
         <p class="stat-label">Inicios de sesión</p>
@@ -155,6 +155,12 @@
             <div style="display:flex;gap:8px;align-items:flex-end">
                 <button type="submit" class="btn-filter">Filtrar</button>
                 <a href="{{ request()->url() }}" class="btn-limpiar">Limpiar</a>
+                <div style="display:flex;gap:8px;align-items:center;margin-left:8px">
+                    @php $qs = request()->getQueryString(); $qs = $qs ? ('?'.$qs) : '' ; @endphp
+                    <a href="{{ request()->url() }}/export/pdf{{ $qs }}" class="btn-filter" style="background:#0b74d1">Descargar PDF</a>
+                    <a href="{{ request()->url() }}/export/xlsx{{ $qs }}" class="btn-filter" style="background:#0b9a44">Descargar Excel</a>
+                    <a href="{{ request()->url() }}/export/csv{{ $qs }}" class="btn-limpiar" style="border-color:#cbd5e1;color:#0b3b11">Descargar CSV</a>
+                </div>
             </div>
         </div>
     </form>
@@ -174,7 +180,8 @@
     </div>
 
     <div class="table-responsive">
-        <table>
+<div class="w-full overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+<table class="min-w-[600px] w-full text-sm text-left">
             <thead>
                 <tr>
                     <th>#</th>
@@ -240,7 +247,8 @@
             @endforelse
             </tbody>
         </table>
-    </div>
+</div>
+ </div>
 </div>
 
 @endsection

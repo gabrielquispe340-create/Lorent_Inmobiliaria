@@ -18,7 +18,7 @@
 {{-- ═══════════════════════════════════════
      TARJETAS DE ESTADÍSTICAS
 ════════════════════════════════════════ --}}
-<div class="stats">
+<div class="stats grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
     {{-- Card 1: Propiedades disponibles (destacada) --}}
     <div class="stat-card">
@@ -52,11 +52,15 @@
         <a href="{{ route('cliente.propiedades') }}" class="btn-primary" style="background:#1a3d8f;color:#fff;box-shadow:none;">Ver todas</a>
     </div>
 
-    <div class="prop-grid">
+    <div class="prop-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     @forelse($propiedades as $p)
     <div class="prop-card">
         <div class="prop-img prop-img-{{ strtolower($p->tipo) }}">
-            <span class="prop-img-placeholder">Sin foto</span>
+            @if($p->imagen)
+                <img src="{{ asset('storage/' . $p->imagen) }}" alt="{{ $p->titulo }}" style="width:100%;height:100%;object-fit:cover;display:block">
+            @else
+                <span class="prop-img-placeholder">Sin foto</span>
+            @endif
             <span class="prop-tag tag-{{ strtolower($p->tipo) }}">{{ $p->tipo }}</span>
             <span class="prop-price-banner">${{ number_format($p->precio, 0, ',', '.') }}</span>
         </div>

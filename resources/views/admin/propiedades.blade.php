@@ -3,6 +3,10 @@
 @section('titulo', 'Propiedades')
 @section('titulo_pagina', 'Propiedades')
 
+@push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+@endpush
+
 @section('contenido')
 
 <div class="card">
@@ -14,8 +18,8 @@
             + Registrar propiedad
         </button>
     </div>
-
-    <table>
+<div class="w-full overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+<table class="min-w-[600px] w-full text-sm text-left">
 
         <thead>
             <tr>
@@ -65,37 +69,40 @@
 
                 <td>
 
-                    <div class="action-btns">
+                    <div class="action-btns flex flex-col sm:flex-row gap-2">
 
                         <button
-                            class="btn-edit"
-                            data-id="{{ $p->id }}"
-                            data-titulo="{{ $p->titulo }}"
-                            data-tipo="{{ $p->tipo }}"
-                            data-zona="{{ $p->zona }}"
-                            data-precio="{{ $p->precio }}"
-                            data-area="{{ $p->area }}"
-                            data-descripcion="{{ $p->descripcion }}"
-                            data-estado="{{ $p->estado }}"
-                            data-agente="{{ $p->agente_id }}"
-                        >
-                            Editar
-                        </button>
+    class="btn-edit w-full sm:w-auto"
+    data-id="{{ $p->id }}"
+    data-titulo="{{ $p->titulo }}"
+    data-tipo="{{ $p->tipo }}"
+    data-zona="{{ $p->zona }}"
+    data-precio="{{ $p->precio }}"
+    data-area="{{ $p->area }}"
+    data-descripcion="{{ $p->descripcion }}"
+    data-estado="{{ $p->estado }}"
+    data-agente="{{ $p->agente_id }}"
+    data-imagen="{{ $p->imagen }}"
+    data-lat="{{ $p->latitud }}"
+    data-lng="{{ $p->longitud }}"
+>
+    Editar
+</button>
 
                         <form method="POST"
-                            action="{{ route('admin.propiedades.destroy', $p) }}"
-                            class="form-eliminar"
-                            data-title="{{ $p->titulo }}"
-                            style="display:inline">
+      action="{{ route('admin.propiedades.destroy', $p) }}"
+      class="form-eliminar"
+      data-title="{{ $p->titulo }}"
+      style="display:inline">
 
-                            @csrf
-                            @method('DELETE')
+    @csrf
+    @method('DELETE')
 
-                            <button type="button" class="btn-delete">
-                                Eliminar
-                            </button>
+    <button type="button" class="btn-delete open-delete-modal w-full sm:w-auto">
+        Eliminar
+    </button>
 
-                        </form>
+</form>
                         
 
                     </div>
@@ -120,14 +127,26 @@
         </tbody>
 
     </table>
+</div>
 
 </div>
 
 {{-- MODAL --}}
 
+@if($errors->any())
+<div style="background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px">
+    <strong>Errores de validación:</strong>
+    <ul style="margin:6px 0 0 18px;padding:0">
+        @foreach($errors->all() as $e)
+            <li>{{ $e }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
+
 <div class="modal-overlay" id="modalOverlay">
 
-    <div class="modal">
+    <div class="modal w-[95%] max-w-lg mx-auto sm:w-full">
 
         <h2 id="modalTitulo">
             Registrar propiedad
@@ -139,6 +158,7 @@
             id="formRegistrar"
             method="POST"
             action="{{ route('admin.propiedades.store') }}"
+            enctype="multipart/form-data"
         >
 
             @csrf
@@ -260,9 +280,31 @@
 
                 </div>
 
+                <div class="form-group full">
+                    <label>Imagen</label>
+                    <input type="file" name="imagen" id="rImagen" accept="image/jpeg,image/png,image/jpg,image/webp">
+                    <img id="rPreview" src="" alt="Vista previa" style="display:none;margin-top:8px;max-height:100px;border-radius:6px;object-fit:cover">
+                </div>
+                {{-- MAPA REGISTRAR --}}
+                <div class="form-group full">
+                    <label>Ubicación en el mapa <small style="color:#6c757d;font-weight:400">(clic para marcar)</small></label>
+                    <div style="display:flex;gap:8px;margin-bottom:8px;">
+                        <input type="text" id="rMapBuscar" placeholder="Ej: Plan 3000, Santa Cruz"
+                            style="flex:1;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;font-size:13px;font-family:inherit;">
+                        <button type="button" onclick="buscarUbicacionR()"
+                            style="padding:8px 14px;background:#185FA5;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;">
+                            Buscar
+                        </button>
+                    </div>
+                    <div id="mapaRegistro" style="height:260px;border-radius:8px;border:1px solid #dee2e6;"></div>
+                    <input type="hidden" name="latitud"  id="rLatitud">
+                    <input type="hidden" name="longitud" id="rLongitud">
+                    <p id="rCoordsTexto" style="font-size:11px;color:#6c757d;margin-top:5px;"></p>
+                </div>
+
             </div>
 
-            <div class="form-actions">
+            <div class="form-actions flex flex-col sm:flex-row gap-2 mt-4">
 
                 <button
                     type="button"
@@ -286,6 +328,7 @@
             id="formEditar"
             method="POST"
             style="display:none"
+            enctype="multipart/form-data"
         >
 
             @csrf
@@ -396,6 +439,13 @@
                 </div>
 
                 <div class="form-group full">
+                    <label>Imagen <small style="color:#6c757d;font-weight:400">(dejar vacío para mantener la actual)</small></label>
+                    <img id="eImgActual" src="" alt="Foto actual" style="display:none;max-height:100px;border-radius:6px;object-fit:cover;margin-bottom:6px">
+                    <input type="file" name="imagen" id="eImagen" accept="image/jpeg,image/png,image/jpg,image/webp">
+                    <img id="ePreview" src="" alt="Vista previa" style="display:none;margin-top:8px;max-height:100px;border-radius:6px;object-fit:cover">
+                </div>
+
+                <div class="form-group full">
 
                     <label>Descripción</label>
 
@@ -408,9 +458,26 @@
 
                 </div>
 
+                {{-- MAPA EDITAR --}}
+                <div class="form-group full">
+                    <label>Ubicación en el mapa <small style="color:#6c757d;font-weight:400">(clic para mover el marcador)</small></label>
+                    <div style="display:flex;gap:8px;margin-bottom:8px;">
+                        <input type="text" id="eMapBuscar" placeholder="Ej: Plan 3000, Santa Cruz"
+                            style="flex:1;padding:8px 12px;border:1px solid #dee2e6;border-radius:6px;font-size:13px;font-family:inherit;">
+                        <button type="button" onclick="buscarUbicacionE()"
+                            style="padding:8px 14px;background:#185FA5;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;">
+                            Buscar
+                        </button>
+                    </div>
+                    <div id="mapaEditar" style="height:260px;border-radius:8px;border:1px solid #dee2e6;"></div>
+                    <input type="hidden" name="latitud"  id="eLatitud">
+                    <input type="hidden" name="longitud" id="eLongitud">
+                    <p id="eCoordsTexto" style="font-size:11px;color:#6c757d;margin-top:5px;"></p>
+                </div>
+
             </div>
 
-            <div class="form-actions">
+            <div class="form-actions flex flex-col sm:flex-row gap-2 mt-4">
 
                 <button
                     type="button"
@@ -432,11 +499,17 @@
 
 </div>
 
+
+
 @endsection
 
 @push('scripts')
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>     
+
 <script>
+
+const SCZ = [-17.7833, -63.1822]; // Coordenadas aproximadas del centro de Santa Cruz para centrar los mapas inicialmente
 
 const overlay = document.getElementById('modalOverlay');
 
@@ -489,7 +562,10 @@ function editarPropiedad(
     area,
     desc,
     estado,
-    agenteId
+    agenteId,
+    imagen,
+    lat,
+    lng
 ) {
 
     formEditar.action = `/admin/propiedades/${id}`;
@@ -503,6 +579,17 @@ function editarPropiedad(
     document.getElementById('eEstado').value = estado;
     document.getElementById('eAgente').value = agenteId || '';
 
+    const imgActual = document.getElementById('eImgActual');
+    if (imagen) {
+        imgActual.src = '/storage/' + imagen;
+        imgActual.style.display = 'block';
+    } else {
+        imgActual.src = '';
+        imgActual.style.display = 'none';
+    }
+    document.getElementById('ePreview').style.display = 'none';
+    document.getElementById('eImagen').value = '';
+
     formRegistrar.style.display = 'none';
 
     formEditar.style.display = 'block';
@@ -510,6 +597,11 @@ function editarPropiedad(
     titulo.textContent = 'Editar propiedad';
 
     overlay.classList.add('open');
+
+    iniciarMapaEditar(
+        lat ? parseFloat(lat) : null,
+        lng ? parseFloat(lng) : null
+    );
 }
 
 // BOTONES EDITAR
@@ -529,15 +621,163 @@ document.querySelectorAll('.btn-edit')
             this.dataset.area,
             this.dataset.descripcion,
             this.dataset.estado,
-            this.dataset.agente
-
+            this.dataset.agente,
+            this.dataset.imagen,    
+            this.dataset.lat,   // ← nuevo
+            this.dataset.lng    // ← nuevo
         );
 
     });
 
 });
 
+document.getElementById('rImagen').addEventListener('change', function(){
+    const prev = document.getElementById('rPreview');
+    if (this.files && this.files[0]) {
+        prev.src = URL.createObjectURL(this.files[0]);
+        prev.style.display = 'block';
+    }
+});
 
+document.getElementById('eImagen').addEventListener('change', function(){
+    const prev = document.getElementById('ePreview');
+    if (this.files && this.files[0]) {
+        prev.src = URL.createObjectURL(this.files[0]);
+        prev.style.display = 'block';
+    }
+});
+
+let pendingDeleteForm = null;
+
+document.querySelectorAll('.open-delete-modal').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const form  = this.closest('.form-eliminar');
+        const title = form.dataset.title || 'este registro';
+        pendingDeleteForm = form;
+        document.getElementById('deleteMsg').textContent =
+            `¿Seguro que deseas eliminar "${title}"? Esta acción no se puede deshacer.`;
+        const overlay = document.getElementById('deleteOverlay');
+        overlay.style.display = 'flex';
+    });
+});
+
+function cerrarDeleteModal() {
+    document.getElementById('deleteOverlay').style.display = 'none';
+    pendingDeleteForm = null;
+}
+
+document.getElementById('btnConfirmarEliminar').addEventListener('click', function() {
+    if (pendingDeleteForm) pendingDeleteForm.submit();
+});
+
+document.getElementById('deleteOverlay').addEventListener('click', function(e) {
+    if (e.target === this) cerrarDeleteModal();
+});
+
+// ── LEAFLET ───────────────────────────────────────────
+// Centro Santa Cruz
+
+// ── MAPA REGISTRAR ────────────────────────────────────
+let mapaR = null, marcadorR = null;
+
+function iniciarMapaRegistro() {
+    if (mapaR) return;
+    setTimeout(() => {
+        mapaR = L.map('mapaRegistro', { preferCanvas: true }).setView(SCZ, 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            { attribution: '© OpenStreetMap' }).addTo(mapaR);
+        mapaR.on('click', e => colocarMarcadorR(e.latlng.lat, e.latlng.lng));
+        setTimeout(() => mapaR.invalidateSize(), 200);
+    }, 500);
+}
+
+function colocarMarcadorR(lat, lng) {
+    if (marcadorR) mapaR.removeLayer(marcadorR);
+    marcadorR = L.marker([lat, lng], { draggable: true }).addTo(mapaR);
+    marcadorR.on('dragend', () => {
+        const p = marcadorR.getLatLng();
+        guardarCoordsR(p.lat, p.lng);
+    });
+    guardarCoordsR(lat, lng);
+}
+
+function guardarCoordsR(lat, lng) {
+    document.getElementById('rLatitud').value  = lat.toFixed(7);
+    document.getElementById('rLongitud').value = lng.toFixed(7);
+    document.getElementById('rCoordsTexto').textContent =
+        `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+}
+
+function buscarUbicacionR() {
+    const q = document.getElementById('rMapBuscar').value.trim();
+    if (!q) return;
+    fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`)
+        .then(r => r.json()).then(data => {
+            if (data.length) {
+                const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
+                mapaR.setView([lat, lng], 16);
+                colocarMarcadorR(lat, lng);
+            } else alert('Ubicación no encontrada.');
+        });
+}
+
+// ── MAPA EDITAR ───────────────────────────────────────
+let mapaE = null, marcadorE = null;
+
+function iniciarMapaEditar(lat, lng) {
+    const centro = (lat && lng) ? [lat, lng] : SCZ;
+    const zoom   = (lat && lng) ? 16 : 13;
+
+    setTimeout(() => {
+        if (mapaE) { mapaE.remove(); mapaE = null; marcadorE = null; }
+        mapaE = L.map('mapaEditar').setView(centro, zoom);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            { attribution: '© OpenStreetMap' }).addTo(mapaE);
+        if (lat && lng) colocarMarcadorE(lat, lng);
+        mapaE.on('click', e => colocarMarcadorE(e.latlng.lat, e.latlng.lng));
+        mapaE.invalidateSize();
+    }, 350);
+}
+
+function colocarMarcadorE(lat, lng) {
+    if (marcadorE) mapaE.removeLayer(marcadorE);
+    marcadorE = L.marker([lat, lng], { draggable: true }).addTo(mapaE);
+    marcadorE.on('dragend', () => {
+        const p = marcadorE.getLatLng();
+        guardarCoordsE(p.lat, p.lng);
+    });
+    guardarCoordsE(lat, lng);
+}
+
+function guardarCoordsE(lat, lng) {
+    document.getElementById('eLatitud').value  = lat.toFixed(7);
+    document.getElementById('eLongitud').value = lng.toFixed(7);
+    document.getElementById('eCoordsTexto').textContent =
+        `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+}
+
+function buscarUbicacionE() {
+    const q = document.getElementById('eMapBuscar').value.trim();
+    if (!q) return;
+    fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`)
+        .then(r => r.json()).then(data => {
+            if (data.length) {
+                const lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
+                mapaE.setView([lat, lng], 16);
+                colocarMarcadorE(lat, lng);
+            } else alert('Ubicación no encontrada.');
+        });
+}
+
+// Iniciar mapa registrar al abrir modal
+document.querySelector('[onclick="abrirModal()"]').addEventListener('click', () => {
+    setTimeout(() => {
+        iniciarMapaRegistro();
+        setTimeout(() => {
+            if (mapaR) mapaR.invalidateSize();
+        }, 300);
+    }, 500);
+});
 
 </script>
 

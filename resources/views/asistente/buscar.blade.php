@@ -222,15 +222,14 @@
         <div class="card" style="margin-bottom:12px;transition:box-shadow .2s"
              onmouseover="this.style.boxShadow='0 4px 20px rgba(124,92,191,0.12)'"
              onmouseout="this.style.boxShadow=''">
-            <div style="display:flex;gap:0;overflow:hidden;border-radius:12px">
+            <div class="flex flex-col sm:flex-row gap-0 overflow-hidden rounded-xl">
 
-                <div style="
-                    width:130px; flex-shrink:0;
-                    background:{{ $p->tipo==='Venta' ? '#1e3a5f' : ($p->tipo==='Alquiler' ? '#0f4c35' : '#2e1a5f') }};
-                    display:flex; align-items:center; justify-content:center;
-                    position:relative;
-                ">
-                    <i class="ti ti-building-estate" style="font-size:32px;color:rgba(255,255,255,0.2)"></i>
+                <div class="w-full sm:w-48 flex-shrink-0 relative" style="background:{{ $p->tipo==='Venta' ? '#1e3a5f' : ($p->tipo==='Alquiler' ? '#0f4c35' : '#2e1a5f') }};">
+                    @if($p->imagen)
+                        <img src="{{ asset('storage/' . $p->imagen) }}" alt="{{ $p->titulo }}" class="w-full h-48 object-cover rounded-t-lg sm:h-full sm:rounded-l-lg sm:rounded-tr-none">
+                    @else
+                        <i class="ti ti-building-estate" style="font-size:32px;color:rgba(255,255,255,0.2)"></i>
+                    @endif
                     <span style="
                         position:absolute; bottom:8px; left:8px;
                         font-size:10px; font-weight:600; padding:3px 8px; border-radius:20px;
@@ -238,7 +237,7 @@
                     ">{{ $p->tipo }}</span>
                 </div>
 
-                <div style="flex:1;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <div class="flex-1 p-4 flex flex-col justify-between gap-3 sm:gap-4">
                     <div style="flex:1;min-width:150px">
                         <p style="font-size:14px;font-weight:600;color:#0f172a;margin-bottom:3px">
                             {{ $p->titulo }}

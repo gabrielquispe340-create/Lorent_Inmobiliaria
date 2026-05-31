@@ -23,9 +23,16 @@ class UsuarioController extends Controller
             'usuario'   => 'required|min:3|unique:usuarios,usuario',
             'contrasena'=> 'required|min:3',
             'rol'       => 'required|in:administrador,agente,asistente,cliente',
+            'descripcion' => 'nullable|string',
         ]);
 
-        $user = Usuario::create($request->only(['nombre','correo','usuario','contrasena','rol']));
+        $data = $request->only(['nombre','correo','usuario','contrasena','rol','descripcion']);
+        // Only keep descripcion when rol is cliente to match DB constraint
+        if (($data['rol'] ?? '') !== 'cliente') {
+            $data['descripcion'] = null;
+        }
+
+        $user = Usuario::create($data);
         RegistroActividad::log('Usuario creado',
             "Se creó el usuario {$user->nombre} con rol {$user->rol}.");
 
@@ -39,11 +46,15 @@ class UsuarioController extends Controller
             'correo'  => 'required|email|unique:usuarios,correo,'.$usuario->id,
             'usuario' => 'required|min:3|unique:usuarios,usuario,'.$usuario->id,
             'rol'     => 'required|in:administrador,agente,asistente,cliente',
+            'descripcion' => 'nullable|string',
         ]);
-
-        $data = $request->only(['nombre','correo','usuario','rol']);
+        $data = $request->only(['nombre','correo','usuario','rol','descripcion']);
         if ($request->filled('contrasena')) {
             $data['contrasena'] = $request->contrasena;
+        }
+
+        if (($data['rol'] ?? '') !== 'cliente') {
+            $data['descripcion'] = null;
         }
 
         $usuario->update($data);
@@ -76,7 +87,14 @@ class UsuarioController extends Controller
             'usuario' => 'required|min:3|unique:usuarios,usuario,'.$usuario->id,
         ]);
 
-        $data = ['nombre' => $request->nombre, 'usuario' => $request->usuario];
+        $request->validate([
+            'descripcion' => 'nullable|string',
+        ]);
+
+        $data = ['nombre' => $request->nombre, 'usuario' => $request->usuario, 'descripcion' => $request->descripcion ?? null];
+        if ($usuario->rol !== 'cliente') {
+            $data['descripcion'] = null;
+        }
         if ($request->filled('contrasena_nueva')) {
             $data['contrasena'] = $request->contrasena_nueva;
         }

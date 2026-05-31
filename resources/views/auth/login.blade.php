@@ -12,13 +12,14 @@
     {{-- FUENTE --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
 
 <div class="auth-container">
 
     {{-- PANEL IZQUIERDO --}}
-    <div class="auth-left">
+    <div class="auth-left hidden md:flex">
 
         <div class="overlay"></div>
 
@@ -46,7 +47,7 @@
     {{-- PANEL DERECHO --}}
     <div class="auth-right">
 
-        <div class="auth-card">
+        <div class="auth-card w-full max-w-md mx-auto p-4">
 
             {{-- LOGO --}}
             <div class="logo-area">
@@ -82,9 +83,9 @@
                     Inicia sesión para continuar
                 </p>
 
-                @if($errors->any())
+                @if($errors->has('correo') || $errors->has('contrasena'))
                     <div class="alert error">
-                        {{ $errors->first() }}
+                        {{ $errors->first('correo') ?? $errors->first('contrasena') }}
                     </div>
                 @endif
 
@@ -138,7 +139,7 @@
                     </div>
 
                     <div class="forgot-password">
-                        <a href="#">
+                        <a href="{{ route('password.request') }}">
                             ¿Olvidaste tu contraseña?
                         </a>
                     </div>
@@ -159,6 +160,16 @@
                 <p class="subtitle">
                     Completa tus datos para registrarte
                 </p>
+
+                @if($errors->any())
+                    <div class="alert error" style="color: #e53935;">
+                        <ul style="margin:0;padding-left:18px;font-size:14px">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
                 <form action="{{ route('registro.post') }}" method="POST">
 
@@ -245,6 +256,27 @@
 
 {{-- JS --}}
 <script src="{{ asset('js/auth/login.js') }}"></script>
+
+<script>
+    @if($errors->any())
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerPanel = document.getElementById('register-panel');
+            const loginPanel = document.getElementById('login-panel');
+            const tabs = document.querySelectorAll('.tab');
+            
+            if (registerPanel) {
+                registerPanel.classList.add('active');
+            }
+            if (loginPanel) {
+                loginPanel.classList.remove('active');
+            }
+            if (tabs.length >= 2) {
+                tabs[0].classList.remove('active');
+                tabs[1].classList.add('active');
+            }
+        });
+    @endif
+</script>
 
 </body>
 </html>

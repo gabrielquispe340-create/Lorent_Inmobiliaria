@@ -25,7 +25,8 @@
     <div class="card-header">
         <span class="card-title">Visitas <span style="font-size:12px;color:#6c757d;font-weight:400">({{ $solicitudes->count() }} registros)</span></span>
     </div>
-    <table>
+<div class="w-full overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+<table class="min-w-[600px] w-full text-sm text-left">
         <thead><tr><th>Propiedad</th><th>Cliente</th><th>Correo</th><th>Fecha</th><th>Estado</th><th>Acción</th></tr></thead>
         <tbody>
         @forelse($solicitudes as $v)
@@ -60,5 +61,7 @@
         @endforelse
         </tbody>
     </table>
+</div>
+
 </div>
 @endsection

@@ -1,4 +1,5 @@
 <?php
+// este archivo trabaja con los modelos propiedad,usuario,solicitudvisita y registroactividad para mostrar las estadísticas y datos relevantes en los dashboards de cada rol (administrador,agente,asistente y cliente)
 // app/Http/Controllers/DashboardController.php — REEMPLAZA el tuyo actual
 namespace App\Http\Controllers;
 
@@ -8,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    // dashboard para el administrador, muestra estadísticas generales del sistema como total de propiedades, usuarios, ventas y las últimas propiedades registradas.
     public function admin()
     {
         $totalProps    = Propiedad::count();
@@ -20,27 +22,25 @@ class DashboardController extends Controller
             'totalProps','disponibles','totalUsuarios','totalVentas','ultimas'
         ));
     }
-
+// dashboard para el agente, muestra estadísticas de sus propiedades, visitas pendientes y las últimas visitas solicitadas por los clientes.
     public function agente()
     {
         $id          = Auth::id();
         $misProps    = Propiedad::where('agente_id',$id)->count();
         $disponibles = Propiedad::where('agente_id',$id)->where('estado','Disponible')->count();
         $vendidas    = Propiedad::where('agente_id',$id)->where('estado','Vendido')->count();
-        $visitasPend = SolicitudVisita::whereHas('propiedad',
-                           fn($q) => $q->where('agente_id',$id))
-                           ->where('estado','pendiente')->count();
+        $visitasPend = SolicitudVisita::where('estado', 'Pendiente')->whereHas('propiedad', function($q) { $q->where('agente_id', auth()->id()); })->count();
         $ultimas     = Propiedad::where('agente_id',$id)->orderBy('id','desc')->limit(5)->get();
         $visitas     = SolicitudVisita::with(['propiedad','cliente'])
-                           ->whereHas('propiedad', fn($q) => $q->where('agente_id',$id))
-                           ->where('estado','pendiente')
-                           ->orderBy('fecha_solicitada')->limit(5)->get();
+                           ->where('estado', 'Pendiente')
+                           ->whereHas('propiedad', function($q) { $q->where('agente_id', auth()->id()); })
+                           ->orderBy('fecha_solicitada')->take(5)->get();
 
         return view('agente.dashboard', compact(
             'misProps','disponibles','vendidas','visitasPend','ultimas','visitas'
         ));
     }
-
+// dashboard para el asistente, muestra estadísticas de clientes, visitas pendientes, visitas programadas para hoy y las últimas actividades realizadas en el sistema.
     public function asistente(Request $request)
     {
         // Stats
@@ -64,7 +64,7 @@ class DashboardController extends Controller
             'clientes','visitas'
         ));
     }
-
+// dashboard para el cliente, muestra estadísticas de propiedades disponibles, ventas, alquileres y las últimas propiedades registradas en el sistema.
     public function cliente()
     {
         $totalDisp     = Propiedad::where('estado','Disponible')->count();

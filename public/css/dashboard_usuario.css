@@ -11,6 +11,7 @@ body {
     font-size: 14px;
     background: #f0f2f5;
     color: #1a1a2e;
+    overflow-x: hidden;
 }
 
 a { text-decoration: none; color: inherit; }
@@ -18,7 +19,7 @@ a { text-decoration: none; color: inherit; }
 /* ══════════════════════════════════════════
    LAYOUT
 ══════════════════════════════════════════ */
-.layout { display:flex; min-height:100vh; }
+.layout { display:flex; min-height:100vh; overflow-x:hidden; }
 
 /* ══════════════════════════════════════════
    SIDEBAR
@@ -97,7 +98,7 @@ a { text-decoration: none; color: inherit; }
 /* ══════════════════════════════════════════
    MAIN
 ══════════════════════════════════════════ */
-.main { margin-left:210px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+.main { margin-left:210px; flex:1; display:flex; flex-direction:column; min-height:100vh; min-width: 0; }
 
 /* ══════════════════════════════════════════
    TOPBAR
@@ -171,7 +172,7 @@ a { text-decoration: none; color: inherit; }
 /* ══════════════════════════════════════════
    CONTENT
 ══════════════════════════════════════════ */
-.content { padding:24px; flex:1; }
+.content { padding:24px; flex:1; min-width: 0; }
 
 /* ══════════════════════════════════════════
    WELCOME BAR

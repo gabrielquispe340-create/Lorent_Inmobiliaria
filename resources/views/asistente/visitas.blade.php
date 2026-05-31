@@ -13,7 +13,8 @@
         </span>
     </div>
     <div class="table-responsive">
-        <table>
+<div class="w-full overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+<table class="min-w-[600px] w-full text-sm text-left">
             <thead>
                 <tr>
                     <th>Cliente</th>
@@ -76,6 +77,7 @@
             @endforelse
             </tbody>
         </table>
-    </div>
+</div>
+ </div>
 </div>
 @endsection
