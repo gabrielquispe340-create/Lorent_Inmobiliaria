@@ -31,6 +31,10 @@ class Usuario extends Authenticatable
         return $this->hasMany(Seguimiento::class, 'agente_id');
     }
 
+    public function resenas() {
+        return $this->hasMany(Resena::class, 'cliente_id');
+    }
+
     public function esAdmin()     { return $this->rol === 'administrador'; }
     public function esAgente()    { return $this->rol === 'agente'; }
     public function esAsistente() { return $this->rol === 'asistente'; }

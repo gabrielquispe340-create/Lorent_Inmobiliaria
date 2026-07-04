@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Propiedad;
 use App\Models\Usuario;
+use App\Models\Resena;
 use App\Models\RegistroActividad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -91,7 +92,9 @@ class PropiedadController extends Controller
         $tipos_validos = ['Venta','Alquiler','Anticretico'];
         $tipo   = $request->query('tipo');
         $filtro = ($tipo && in_array($tipo, $tipos_validos)) ? $tipo : 'Todas';
-        $query  = Propiedad::where('estado','Disponible');
+        $query  = Propiedad::where('estado','Disponible')
+            ->withAvg('resenas', 'puntuacion')
+            ->withCount('resenas');
         if ($filtro !== 'Todas') $query->where('tipo', $filtro);
         $propiedades = $query->orderBy('id','desc')->get();
         return view('cliente.propiedades', compact('propiedades','filtro'));
@@ -139,8 +142,49 @@ class PropiedadController extends Controller
 
     public function detalle(Propiedad $propiedad)
     {
-        $propiedad->load('agente');
-        return view('cliente.detalle', compact('propiedad'));
+        $propiedad->load('agente', 'resenas.cliente');
+        $user = Auth::user();
+        $yaResenado = $user && $user->esCliente()
+            ? Resena::where('propiedad_id', $propiedad->id)
+                    ->where('cliente_id', $user->id)
+                    ->exists()
+            : false;
+        return view('cliente.detalle', compact('propiedad', 'yaResenado'));
+    }
+
+    public function storeResena(Request $request, Propiedad $propiedad)
+    {
+        $request->validate([
+            'puntuacion' => 'required|integer|min:1|max:5',
+            'comentario' => 'nullable|string|max:1000',
+        ]);
+
+        $user = Auth::user();
+        if (!$user->esCliente()) {
+            return back()->with('error', 'Solo los clientes pueden dejar reseñas.');
+        }
+
+        $existe = Resena::where('propiedad_id', $propiedad->id)
+                        ->where('cliente_id', $user->id)
+                        ->exists();
+        if ($existe) {
+            return back()->with('error', 'Ya has dejado una reseña para esta propiedad.');
+        }
+
+        Resena::create([
+            'propiedad_id' => $propiedad->id,
+            'cliente_id'   => $user->id,
+            'puntuacion'   => $request->puntuacion,
+            'comentario'   => $request->comentario,
+            'fecha'        => now(),
+        ]);
+
+        RegistroActividad::log(
+            'Resena creada',
+            "El cliente {$user->nombre} reseñó \"{$propiedad->titulo}\" con {$request->puntuacion} estrellas."
+        );
+
+        return back()->with('success', 'Reseña publicada correctamente.');
     }
 
     // ─── CU8: BUSCAR PROPIEDADES — ADMINISTRADOR ────────────────

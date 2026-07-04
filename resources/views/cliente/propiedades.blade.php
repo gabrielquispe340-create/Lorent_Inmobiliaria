@@ -44,6 +44,14 @@
         <div class="prop-body">
             <p class="prop-title">{{ $p->titulo }}</p>
             <p class="prop-zona">{{ $p->zona }}</p>
+            @if($p->resenas_count > 0)
+            <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;">
+                @for($i = 1; $i <= 5; $i++)
+                    <span style="font-size:14px;{{ $i <= round($p->resenas_avg_puntuacion) ? 'color:#f5b342;' : 'color:#ddd;' }}">★</span>
+                @endfor
+                <span style="font-size:11px;color:#8a94a6;margin-left:2px">({{ $p->resenas_count }})</span>
+            </div>
+            @endif
             <div class="prop-footer">
                 <div>
                     <p class="prop-price">${{ number_format($p->precio,0,',','.') }}</p>

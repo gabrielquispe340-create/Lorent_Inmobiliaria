@@ -28,4 +28,7 @@ class Propiedad extends Model
     public function solicitudes() {
         return $this->hasMany(SolicitudVisita::class, 'propiedad_id');
     }
+    public function resenas() {
+        return $this->hasMany(Resena::class, 'propiedad_id');
+    }
 }

@@ -56,6 +56,10 @@ Route::middleware(['auth', 'role:administrador'])
         Route::get('/dashboard', [DashboardController::class, 'admin'])
             ->name('dashboard');
 
+        // Comando manual desde el dashboard administrador
+        Route::post('/comando', [DashboardController::class, 'comando'])
+            ->name('comando');
+
         // Propiedades
         Route::get('/propiedades', [PropiedadController::class, 'index'])
             ->name('propiedades');
@@ -214,6 +218,9 @@ Route::middleware(['auth'])
 
         Route::get('/mis-solicitudes', [SolicitudController::class, 'misSolicitudes'])
             ->name('solicitudes');
+
+        Route::post('/propiedades/{propiedad}/resenas', [PropiedadController::class, 'storeResena'])
+            ->name('propiedades.resenas.store');
 
         Route::get('/calendario', [SolicitudController::class, 'calendarioCliente'])
             ->name('calendario');

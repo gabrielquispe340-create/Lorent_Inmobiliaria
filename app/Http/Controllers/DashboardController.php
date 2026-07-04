@@ -22,6 +22,36 @@ class DashboardController extends Controller
             'totalProps','disponibles','totalUsuarios','totalVentas','ultimas'
         ));
     }
+
+    /**
+     * Procesar comando enviado desde el dashboard administrador.
+     * Responde JSON con un mensaje simple y registra la actividad.
+     */
+    public function comando(Request $request)
+    {
+        $request->validate([
+            'comando' => 'required|string|max:500',
+        ], [
+            'comando.required' => 'El comando es obligatorio.',
+        ]);
+
+        $user = Auth::user();
+
+        // Registrar la actividad para auditoría
+        RegistroActividad::log(
+            'Comando administrador',
+            "El usuario {$user->nombre} ({$user->rol}) ejecutó el comando: {$request->comando}"
+        );
+
+        // Respuesta simple (puedes integrar aquí lógica adicional o llamadas a servicios)
+        $responseText = "Comando recibido: {$request->comando}";
+
+        return response()->json([
+            'status' => 'ok',
+            'message' => 'Comando procesado.',
+            'response' => $responseText,
+        ]);
+    }
 // dashboard para el agente, muestra estadísticas de sus propiedades, visitas pendientes y las últimas visitas solicitadas por los clientes.
     public function agente()
     {

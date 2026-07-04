@@ -4,6 +4,38 @@
 
 @section('contenido')
 
+<!-- Botón flotante "Comando con vos" (visible en móvil y escritorio) -->
+<button id="openComandoBtn" title="Comando con vos"
+        class="fixed bottom-6 right-6 md:bottom-8 md:right-8 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-3 shadow-lg z-50">
+    Con vos
+</button>
+
+<!-- Modal comando -->
+<div id="comandoModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-40 p-4">
+    <div class="bg-white rounded-lg w-full max-w-2xl mx-auto p-4 md:p-6">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-lg font-semibold">Comando con vos</h3>
+            <button id="closeComandoModal" class="text-gray-600 text-2xl leading-none">×</button>
+        </div>
+
+        <form id="comandoForm" class="space-y-3">
+            @csrf
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <textarea name="comando" id="comandoInput" rows="4" class="w-full border rounded p-2" placeholder="Escribe tu comando, por ejemplo: 'Generar reporte de propiedades'..."></textarea>
+
+            <div class="flex items-center justify-between">
+                <small id="comandoStatus" class="text-sm text-gray-500">Escribe un comando y presiona Enviar.</small>
+                <div class="flex gap-2">
+                    <button type="button" id="sendComandoBtn" class="btn-primary">Enviar</button>
+                    <button type="button" id="cancelComandoBtn" class="btn-secondary">Cancelar</button>
+                </div>
+            </div>
+        </form>
+
+        <div id="comandoResponse" class="mt-4 hidden bg-gray-50 p-3 rounded border text-sm"></div>
+    </div>
+</div>
+
 {{-- ═══════════════════════════════════════
      TARJETAS DE ESTADÍSTICAS
 ════════════════════════════════════════ --}}
@@ -144,3 +176,74 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const openBtn = document.getElementById('openComandoBtn');
+    const modal = document.getElementById('comandoModal');
+    const closeBtn = document.getElementById('closeComandoModal');
+    const cancelBtn = document.getElementById('cancelComandoBtn');
+    const sendBtn = document.getElementById('sendComandoBtn');
+    const input = document.getElementById('comandoInput');
+    const respDiv = document.getElementById('comandoResponse');
+    const status = document.getElementById('comandoStatus');
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrf = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+    function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        input.focus();
+        respDiv.classList.add('hidden');
+        respDiv.textContent = '';
+        status.textContent = 'Escribe un comando y presiona Enviar.';
+    }
+
+    function closeModal() {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }
+
+    openBtn?.addEventListener('click', openModal);
+    closeBtn?.addEventListener('click', closeModal);
+    cancelBtn?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    sendBtn?.addEventListener('click', async () => {
+        const comando = input.value.trim();
+        if (!comando) { status.textContent = 'Escribe un comando.'; input.focus(); return; }
+        status.textContent = 'Enviando...';
+        sendBtn.disabled = true;
+        try {
+            const res = await fetch("{{ route('admin.comando') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ comando })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                respDiv.classList.remove('hidden');
+                respDiv.textContent = data.response || data.message || 'Comando procesado.';
+                status.textContent = 'Listo';
+            } else {
+                const err = data?.message || 'Error al procesar el comando.';
+                status.textContent = err;
+            }
+        } catch (e) {
+            status.textContent = 'Error de red.';
+        } finally {
+            sendBtn.disabled = false;
+        }
+    });
+
+
+});
+</script>
+@endpush
