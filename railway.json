@@ -1,0 +1,16 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": {
+      "command": "composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-gd && npm install && npm run build && php artisan key:generate && php artisan config:cache && php artisan route:cache && php artisan view:cache",
+      "environments": {
+        "COMPOSER_ALLOW_SUPERUSER": "1"
+      }
+    }
+  },
+  "deploy": {
+    "startCommand": "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}
