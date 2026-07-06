@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('titulo', 'Lorent Inmobiliaria')</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     @if(in_array(auth()->user()->rol, ['administrador','agente','asistente']))
         <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
@@ -13,6 +14,7 @@
     @endif
     <link rel="stylesheet" href="{{ asset('css/compartido/topbar.css') }}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
     @stack('styles')
     <style> #sidebar-mobile { position: fixed !important; top: 0; left: 0; bottom: 0; width: 260px; background: #0f172a; z-index: 9999; transform: translateX(-100%); transition: transform 0.3s ease; } #sidebar-mobile.active { transform: translateX(0); } @media (min-width: 768px) { #sidebar-mobile { position: static !important; transform: none !important; } } </style>
 </head>
@@ -234,5 +236,7 @@ window.onload = function() {
     }
 };
 </script>
+
+@include('compartido.voice-chat')
 </body>
 </html>

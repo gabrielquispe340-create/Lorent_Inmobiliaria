@@ -54,7 +54,8 @@
 
     <div class="prop-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     @forelse($propiedades as $p)
-    <div class="prop-card">
+    <div class="prop-card" style="position:relative;overflow:hidden;">
+        @include('compartido.badges', ['badges' => $p->badges, 'propiedad' => $p])
         <div class="prop-img prop-img-{{ strtolower($p->tipo) }}">
             @if($p->imagen)
                 <img src="{{ asset('storage/' . $p->imagen) }}" alt="{{ $p->titulo }}" style="width:100%;height:100%;object-fit:cover;display:block">
@@ -62,7 +63,6 @@
                 <span class="prop-img-placeholder">Sin foto</span>
             @endif
             <span class="prop-tag tag-{{ strtolower($p->tipo) }}">{{ $p->tipo }}</span>
-            <span class="prop-price-banner">${{ number_format($p->precio, 0, ',', '.') }}</span>
         </div>
         <div class="prop-body">
             <p class="prop-title">{{ $p->titulo }}</p>

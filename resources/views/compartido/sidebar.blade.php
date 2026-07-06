@@ -122,6 +122,9 @@ if ($rol === 'agente') {
         <a href="{{ route('cliente.calendario') }}" class="nav-item {{ str_starts_with($ruta,'cliente.calendario') ? 'active':'' }}">
             <span class="nav-dot" style="background:#818cf8"></span>Calendario
         </a>
+        <a href="{{ route('cliente.favoritos.index') }}" class="nav-item {{ str_starts_with($ruta,'cliente.favoritos') ? 'active':'' }}">
+            <span class="nav-dot" style="background:#ef4444"></span>Mis Favoritos
+        </a>
         <p class="nav-section">Cuenta</p>
         <a href="{{ route('perfil') }}" class="nav-item {{ $ruta === 'perfil' ? 'active':'' }}">
             <span class="nav-dot" style="background:#AFA9EC"></span>Mi perfil

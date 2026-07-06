@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\Propiedad;
 use App\Models\Usuario;
 use App\Models\Resena;
+use App\Models\Favorito;
 use App\Models\RegistroActividad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,8 +43,9 @@ class PropiedadController extends Controller
         if ($request->hasFile('imagen')) {
             $data['imagen'] = $request->file('imagen')->store('propiedades', 'public');
         }
-        $data['latitud']  = $request->latitud  ?: null;
-        $data['longitud'] = $request->longitud ?: null;
+        $data['latitud']    = $request->latitud  ?: null;
+        $data['longitud']   = $request->longitud ?: null;
+        $data['created_at'] = now();
         $prop = Propiedad::create($data);
         RegistroActividad::log('Propiedad registrada', "Se registró: \"{$prop->titulo}\" ({$prop->tipo}) en {$prop->zona}.");
         return back()->with('success','Propiedad registrada correctamente.');
@@ -65,6 +67,10 @@ class PropiedadController extends Controller
 
         $propiedad = Propiedad::findOrFail($id);
         $datos = $request->except('imagen');
+
+        if ($request->filled('precio') && (float)$request->precio < (float)$propiedad->precio) {
+            $datos['precio_anterior'] = $propiedad->precio;
+        }
 
         if ($request->hasFile('imagen')) {
             if ($propiedad->imagen) {
@@ -97,7 +103,10 @@ class PropiedadController extends Controller
             ->withCount('resenas');
         if ($filtro !== 'Todas') $query->where('tipo', $filtro);
         $propiedades = $query->orderBy('id','desc')->get();
-        return view('cliente.propiedades', compact('propiedades','filtro'));
+        $favoritosIds = Favorito::where('cliente_id', auth()->id())
+            ->pluck('propiedad_id')
+            ->all();
+        return view('cliente.propiedades', compact('propiedades','filtro','favoritosIds'));
     }
 
     // ─── CU8: BUSCAR PROPIEDADES ─────────────────────────────
@@ -134,9 +143,12 @@ class PropiedadController extends Controller
 
         $propiedades      = $query->orderBy('id','desc')->get();
         $totalDisponibles = Propiedad::where('estado','Disponible')->count();
+        $favoritosIds     = Auth::check() && Auth::user()->esCliente()
+            ? Favorito::where('cliente_id', Auth::id())->pluck('propiedad_id')->toArray()
+            : [];
 
         return view('cliente.buscar', compact(
-            'propiedades','q','tipo','estado','precioMax','areaMin','totalDisponibles'
+            'propiedades','q','tipo','estado','precioMax','areaMin','totalDisponibles','favoritosIds'
         ));
     }
 

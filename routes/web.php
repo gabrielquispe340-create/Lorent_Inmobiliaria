@@ -19,6 +19,8 @@ use App\Http\Controllers\SolicitudController;
 use App\Http\Controllers\SeguimientoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ProspectoController;
+use App\Http\Controllers\VoiceChatController;
+use App\Http\Controllers\FavoritoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -226,6 +228,14 @@ Route::middleware(['auth'])
             ->name('calendario');
         Route::get('/calendario/eventos', [SolicitudController::class, 'eventosCliente'])
             ->name('calendario.eventos');
+
+        // CU22: Favoritos
+        Route::get('/mis-favoritos', [FavoritoController::class, 'index'])
+            ->name('favoritos.index');
+        Route::post('/favoritos/{propiedad}/toggle', [FavoritoController::class, 'toggle'])
+            ->name('favoritos.toggle');
+        Route::delete('/favoritos/{propiedad}', [FavoritoController::class, 'destroy'])
+            ->name('favoritos.destroy');
     });
 
 /*
@@ -241,4 +251,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::put('/perfil', [UsuarioController::class, 'actualizarPerfil'])
         ->name('perfil.update');
+
+    // Chat de voz AI
+    Route::post('/voice-chat', [VoiceChatController::class, 'process'])
+        ->name('voice-chat.process');
 });

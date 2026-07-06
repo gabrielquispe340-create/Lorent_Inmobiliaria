@@ -1,14 +1,7 @@
 <?php
-// app/Models/Propiedad.php
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Modelo de propiedad inmobiliaria.
- *
- * Representa una fila de la tabla `propiedades` y define
- * las relaciones con agente y solicitudes de visita.
- */
 class Propiedad extends Model
 {
     protected $table   = 'propiedades';
@@ -20,7 +13,52 @@ class Propiedad extends Model
         'categoria_id','propietario_id',
         'habitaciones','banos','antiguedad',
         'latitud','longitud',
+        'precio_anterior','created_at',
     ];
+
+    protected $casts = [
+        'precio'          => 'float',
+        'precio_anterior' => 'float',
+        'created_at'      => 'datetime',
+    ];
+
+    protected $appends = ['badges'];
+
+    public function getBadgesAttribute(): array
+    {
+        $badges = [];
+
+        if ($this->precio_anterior > 0 && $this->precio < $this->precio_anterior) {
+            $porcentaje = round((1 - $this->precio / $this->precio_anterior) * 100);
+            $badges[] = [
+                'texto'  => "!Rebajado! -{$porcentaje}%",
+                'tipo'   => 'danger',
+                'icono'  => 'ti ti-arrow-down-right',
+            ];
+        }
+
+        if ($this->created_at && $this->created_at->gt(now()->subDays(3))) {
+            $badges[] = [
+                'texto'  => 'Nuevo',
+                'tipo'   => 'success',
+                'icono'  => 'ti ti-sparkles',
+            ];
+        }
+
+        $solicitudesActivas = $this->solicitudes()
+            ->whereNotIn('estado', ['Rechazada', 'Cancelada'])
+            ->count();
+
+        if ($solicitudesActivas >= 3) {
+            $badges[] = [
+                'texto'  => 'Alta Demanda',
+                'tipo'   => 'warning',
+                'icono'  => 'ti ti-flame',
+            ];
+        }
+
+        return $badges;
+    }
 
     public function agente() {
         return $this->belongsTo(Usuario::class, 'agente_id');
@@ -30,5 +68,9 @@ class Propiedad extends Model
     }
     public function resenas() {
         return $this->hasMany(Resena::class, 'propiedad_id');
+    }
+
+    public function favoritos() {
+        return $this->hasMany(Favorito::class, 'propiedad_id');
     }
 }

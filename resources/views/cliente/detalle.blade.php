@@ -40,6 +40,7 @@
     <div style="display:flex; flex-direction:row; gap:20px; align-items:flex-start;">
         <div class="card" style="flex:0 0 360px; max-width:360px;">
             <div class="w-full relative overflow-hidden bg-slate-100 mb-5 rounded-lg" style="height:220px;">
+                @include('compartido.badges', ['badges' => $propiedad->badges, 'propiedad' => $propiedad])
                 @if($propiedad->imagen)
                     <img src="{{ asset('storage/' . $propiedad->imagen) }}" alt="{{ $propiedad->titulo }}" style="width:100%;height:100%;object-fit:cover;">
                 @else

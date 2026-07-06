@@ -32,14 +32,26 @@
     </div>
     <div class="prop-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     @forelse($propiedades as $p)
-    <div class="prop-card">
-        <div class="prop-img prop-img-{{ strtolower($p->tipo) }}">
+    @php $esFavorito = in_array($p->id, $favoritosIds); @endphp
+    <div class="prop-card" style="position:relative;overflow:hidden;">
+        @include('compartido.badges', ['badges' => $p->badges, 'propiedad' => $p])
+        <div class="prop-img prop-img-{{ strtolower($p->tipo) }}" style="position:relative;">
             @if($p->imagen)
                 <img src="{{ asset('storage/' . $p->imagen) }}" alt="{{ $p->titulo }}" style="width:100%;height:100%;object-fit:cover;display:block">
             @else
                 <span class="prop-img-placeholder">Sin foto</span>
             @endif
             <span class="prop-tag tag-{{ strtolower($p->tipo) }}">{{ $p->tipo }}</span>
+            <form method="POST" action="{{ route('cliente.favoritos.toggle', $p->id) }}" style="position:absolute;bottom:8px;left:8px;z-index:5;margin:0;">
+                @csrf
+                <button type="submit" title="{{ $esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos' }}" aria-label="{{ $esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos' }}" style="background:none;border:none;cursor:pointer;font-size:24px;line-height:1;padding:2px;text-shadow:0 1px 4px rgba(0,0,0,0.4);transition:transform 0.15s;">
+                    @if($esFavorito)
+                        <span style="color:#ef4444;">❤️</span>
+                    @else
+                        <span style="color:white;">♡</span>
+                    @endif
+                </button>
+            </form>
         </div>
         <div class="prop-body">
             <p class="prop-title">{{ $p->titulo }}</p>

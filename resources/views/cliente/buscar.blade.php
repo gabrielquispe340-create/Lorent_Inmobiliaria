@@ -238,9 +238,11 @@
 
         {{-- Lista de propiedades --}}
         @forelse($propiedades as $p)
-        <div class="card" style="margin-bottom:12px;transition:box-shadow .2s;cursor:pointer"
+        @php $esFavorito = in_array($p->id, $favoritosIds); @endphp
+        <div class="card" style="margin-bottom:12px;transition:box-shadow .2s;cursor:pointer;position:relative;overflow:hidden;"
              onmouseover="this.style.boxShadow='0 4px 20px rgba(79,110,247,0.12)'"
              onmouseout="this.style.boxShadow=''">
+            @include('compartido.badges', ['badges' => $p->badges, 'propiedad' => $p])
             <div class="flex flex-col sm:flex-row gap-0 overflow-hidden rounded-xl">
 
                 {{-- Imagen/color de propiedad --}}
@@ -256,6 +258,16 @@
                         font-size:10px; font-weight:600; padding:3px 8px; border-radius:20px;
                         {{ $p->tipo==='Venta' ? 'background:#dbeafe;color:#1e40af' : ($p->tipo==='Alquiler' ? 'background:#d1fae5;color:#065f46' : 'background:#ede9fe;color:#5b21b6') }}
                     ">{{ $p->tipo }}</span>
+                    <form method="POST" action="{{ route('cliente.favoritos.toggle', $p->id) }}" style="position:absolute;bottom:8px;right:8px;z-index:5;margin:0;">
+                        @csrf
+                        <button type="submit" title="{{ $esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos' }}" aria-label="{{ $esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos' }}" style="background:none;border:none;cursor:pointer;font-size:20px;line-height:1;padding:2px;text-shadow:0 1px 4px rgba(0,0,0,0.4);transition:transform 0.15s;">
+                            @if($esFavorito)
+                                <span style="color:#ef4444;">❤️</span>
+                            @else
+                                <span style="color:white;">♡</span>
+                            @endif
+                        </button>
+                    </form>
                 </div>
 
                 {{-- Cuerpo --}}
