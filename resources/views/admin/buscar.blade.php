@@ -289,7 +289,7 @@
                     position:relative; overflow:hidden;
                 ">
                     @if($p->imagen)
-                        <img src="{{ asset('storage/' . $p->imagen) }}" alt="{{ $p->titulo }}" class="w-full h-48 object-cover rounded-t-lg sm:h-full sm:rounded-l-lg sm:rounded-tr-none">
+                        <img src="{{ asset('imagenes/' . $p->imagen) }}" alt="{{ $p->titulo }}" class="w-full h-48 object-cover rounded-t-lg sm:h-full sm:rounded-l-lg sm:rounded-tr-none">
                     @else
                         <i class="ti ti-building-estate" style="font-size:32px;color:rgba(255,255,255,0.2)"></i>
                     @endif
@@ -482,7 +482,7 @@ function editarPropiedad(id, titulo, tipo, zona, precio, area, descripcion, esta
     document.getElementById('eEstado').value      = estado;
     document.getElementById('eAgente').value      = agente || '';
     const imgActual = document.getElementById('bImgActual');
-    if (imagen) { imgActual.src = '/storage/' + imagen; imgActual.style.display = 'block'; }
+    if (imagen) { imgActual.src = '/imagenes/' + imagen; imgActual.style.display = 'block'; }
     else { imgActual.src = ''; imgActual.style.display = 'none'; }
     document.getElementById('bPreview').style.display = 'none';
     document.getElementById('bImagen').value = '';

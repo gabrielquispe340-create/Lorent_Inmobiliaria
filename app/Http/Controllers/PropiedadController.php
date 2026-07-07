@@ -41,7 +41,7 @@ class PropiedadController extends Controller
         $data = $request->only(['titulo','tipo','zona','precio','area','descripcion','estado','agente_id']);
         if (Auth::user()->esAgente()) $data['agente_id'] = Auth::id();
         if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('propiedades', 'public');
+            $data['imagen'] = $request->file('imagen')->store('propiedades', 'public_imagenes');
         }
         $data['latitud']    = $request->latitud  ?: null;
         $data['longitud']   = $request->longitud ?: null;
@@ -74,9 +74,9 @@ class PropiedadController extends Controller
 
         if ($request->hasFile('imagen')) {
             if ($propiedad->imagen) {
-                Storage::disk('public')->delete($propiedad->imagen);
+                Storage::disk('public_imagenes')->delete($propiedad->imagen);
             }
-            $datos['imagen'] = $request->file('imagen')->store('propiedades', 'public');
+            $datos['imagen'] = $request->file('imagen')->store('propiedades', 'public_imagenes');
         }
 
         $propiedad->update($datos);
@@ -88,6 +88,9 @@ class PropiedadController extends Controller
     public function destroy(Propiedad $propiedad)
     {
         $titulo = $propiedad->titulo;
+        if ($propiedad->imagen) {
+            Storage::disk('public_imagenes')->delete($propiedad->imagen);
+        }
         $propiedad->delete();
         RegistroActividad::log('Propiedad eliminada', "Se eliminó: \"$titulo\".");
         return back()->with('success','Propiedad eliminada correctamente.');

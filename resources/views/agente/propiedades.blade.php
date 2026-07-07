@@ -169,7 +169,7 @@ function editarPropiedad(id, titulo, tipo, zona, precio, area, descripcion, esta
     document.getElementById('propEstado').value      = estado;
 
     const imgActual = document.getElementById('aImgActual');
-    if (imagen) { imgActual.src = '/storage/' + imagen; imgActual.style.display = 'block'; }
+    if (imagen) { imgActual.src = '/imagenes/' + imagen; imgActual.style.display = 'block'; }
     else        { imgActual.src = ''; imgActual.style.display = 'none'; }
     document.getElementById('aPreview').style.display = 'none';
     document.getElementById('aImagen').value = '';

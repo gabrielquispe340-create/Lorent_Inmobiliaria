@@ -581,7 +581,7 @@ function editarPropiedad(
 
     const imgActual = document.getElementById('eImgActual');
     if (imagen) {
-        imgActual.src = '/storage/' + imagen;
+        imgActual.src = '/imagenes/' + imagen;
         imgActual.style.display = 'block';
     } else {
         imgActual.src = '';

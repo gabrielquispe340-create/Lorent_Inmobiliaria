@@ -37,7 +37,7 @@
         @include('compartido.badges', ['badges' => $p->badges, 'propiedad' => $p])
         <div class="prop-img prop-img-{{ strtolower($p->tipo) }}" style="position:relative;">
             @if($p->imagen)
-                <img src="{{ asset('storage/' . $p->imagen) }}" alt="{{ $p->titulo }}" style="width:100%;height:100%;object-fit:cover;display:block">
+                <img src="{{ asset('imagenes/' . $p->imagen) }}" alt="{{ $p->titulo }}" style="width:100%;height:100%;object-fit:cover;display:block">
             @else
                 <span class="prop-img-placeholder">Sin foto</span>
             @endif

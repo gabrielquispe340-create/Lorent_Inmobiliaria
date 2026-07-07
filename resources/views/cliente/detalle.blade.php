@@ -42,7 +42,7 @@
             <div class="w-full relative overflow-hidden bg-slate-100 mb-5 rounded-lg" style="height:220px;">
                 @include('compartido.badges', ['badges' => $propiedad->badges, 'propiedad' => $propiedad])
                 @if($propiedad->imagen)
-                    <img src="{{ asset('storage/' . $propiedad->imagen) }}" alt="{{ $propiedad->titulo }}" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="{{ asset('imagenes/' . $propiedad->imagen) }}" alt="{{ $propiedad->titulo }}" style="width:100%;height:100%;object-fit:cover;">
                 @else
                     <span style="color:#aaa;font-size:14px">Sin foto disponible</span>
                 @endif
