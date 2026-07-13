@@ -29,6 +29,7 @@
                 <th>Zona</th>
                 <th>Precio</th>
                 <th>Área</th>
+                <th>Visitas</th>
                 <th>Estado</th>
                 <th>Agente</th>
                 <th>Acciones</th>
@@ -56,6 +57,8 @@
                 <td>
                     {{ $p->area ? $p->area . ' m²' : '—' }}
                 </td>
+
+                <td>{{ $p->vistas ?? 0 }}</td>
 
                 <td>
                     <span class="badge badge-{{ strtolower($p->estado) }}">
@@ -115,7 +118,7 @@
 
             <tr>
                 <td
-                    colspan="9"
+                    colspan="10"
                     style="text-align:center;color:#6c757d;padding:20px"
                 >
                     No hay propiedades registradas.

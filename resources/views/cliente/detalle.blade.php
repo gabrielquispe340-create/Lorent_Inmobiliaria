@@ -55,6 +55,7 @@
                 <div class="info-item"><label>Estado</label><p><span class="badge badge-{{ strtolower($propiedad->estado) }}">{{ $propiedad->estado }}</span></p></div>
                 <div class="info-item"><label>Área</label><p>{{ $propiedad->area ? $propiedad->area.' m²' : '—' }}</p></div>
                 <div class="info-item"><label>Agente</label><p>{{ $propiedad->agente->nombre ?? 'Sin asignar' }}</p></div>
+                <div class="info-item"><label>Visitas</label><p>👁️ {{ $propiedad->vistas ?? 0 }}</p></div>
             </div>
             <hr style="border:none;border-top:1px solid #e2e6ea;margin:20px 0">
             <p style="font-size:13px;font-weight:500;color:#0f4c75;margin-bottom:8px">Descripción</p>

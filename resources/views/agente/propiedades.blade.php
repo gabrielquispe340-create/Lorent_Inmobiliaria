@@ -14,7 +14,7 @@
     </div>
 <div class="w-full overflow-x-auto shadow-sm rounded-lg border border-gray-200">
 <table class="min-w-[600px] w-full text-sm text-left">
-        <thead><tr><th>#</th><th>Título</th><th>Tipo</th><th>Zona</th><th>Precio</th><th>Área</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <thead><tr><th>#</th><th>Título</th><th>Tipo</th><th>Zona</th><th>Precio</th><th>Área</th><th>Visitas</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>
         @forelse($propiedades as $p)
         <tr>
@@ -24,6 +24,7 @@
             <td>{{ $p->zona }}</td>
             <td>${{ number_format($p->precio,0,',','.') }}</td>
             <td>{{ $p->area ? $p->area.' m²' : '—' }}</td>
+            <td>{{ $p->vistas ?? 0 }}</td>
             <td><span class="badge badge-{{ strtolower($p->estado) }}">{{ $p->estado }}</span></td>
             <td>
                 <div class="action-btns">
@@ -59,7 +60,7 @@
             </td>
         </tr>
         @empty
-        <tr><td colspan="8" style="text-align:center;color:#6c757d;padding:20px">No tienes propiedades registradas.</td></tr>
+        <tr><td colspan="9" style="text-align:center;color:#6c757d;padding:20px">No tienes propiedades registradas.</td></tr>
         @endforelse
         </tbody>
     </table>

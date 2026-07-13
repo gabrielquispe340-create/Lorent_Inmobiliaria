@@ -13,7 +13,7 @@ class Propiedad extends Model
         'categoria_id','propietario_id',
         'habitaciones','banos','antiguedad',
         'latitud','longitud',
-        'precio_anterior','created_at',
+        'precio_anterior','created_at','vistas',
     ];
 
     protected $casts = [

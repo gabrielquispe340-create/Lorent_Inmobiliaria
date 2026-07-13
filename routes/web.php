@@ -229,6 +229,10 @@ Route::middleware(['auth'])
         Route::get('/calendario/eventos', [SolicitudController::class, 'eventosCliente'])
             ->name('calendario.eventos');
 
+        // Mis comentarios
+        Route::get('/mis-comentarios', [PropiedadController::class, 'misResenas'])
+            ->name('resenas.index');
+
         // CU22: Favoritos
         Route::get('/mis-favoritos', [FavoritoController::class, 'index'])
             ->name('favoritos.index');

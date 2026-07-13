@@ -125,6 +125,9 @@ if ($rol === 'agente') {
         <a href="{{ route('cliente.favoritos.index') }}" class="nav-item {{ str_starts_with($ruta,'cliente.favoritos') ? 'active':'' }}">
             <span class="nav-dot" style="background:#ef4444"></span>Mis Favoritos
         </a>
+        <a href="{{ route('cliente.resenas.index') }}" class="nav-item {{ str_starts_with($ruta,'cliente.resenas') ? 'active':'' }}">
+            <span class="nav-dot" style="background:#f5b342"></span>Mis Comentarios
+        </a>
         <p class="nav-section">Cuenta</p>
         <a href="{{ route('perfil') }}" class="nav-item {{ $ruta === 'perfil' ? 'active':'' }}">
             <span class="nav-dot" style="background:#AFA9EC"></span>Mi perfil

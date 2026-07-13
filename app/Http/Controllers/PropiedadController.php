@@ -8,6 +8,7 @@ use App\Models\Usuario;
 use App\Models\Resena;
 use App\Models\Favorito;
 use App\Models\RegistroActividad;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -158,6 +159,7 @@ class PropiedadController extends Controller
     public function detalle(Propiedad $propiedad)
     {
         $propiedad->load('agente', 'resenas.cliente');
+        $propiedad->increment('vistas');
         $user = Auth::user();
         $yaResenado = $user && $user->esCliente()
             ? Resena::where('propiedad_id', $propiedad->id)
@@ -200,6 +202,16 @@ class PropiedadController extends Controller
         );
 
         return back()->with('success', 'Reseña publicada correctamente.');
+    }
+
+    public function misResenas()
+    {
+        $resenas = Resena::with('propiedad')
+            ->where('cliente_id', auth()->id())
+            ->orderBy('fecha', 'desc')
+            ->get();
+
+        return view('cliente.resenas', compact('resenas'));
     }
 
     // ─── CU8: BUSCAR PROPIEDADES — ADMINISTRADOR ────────────────
